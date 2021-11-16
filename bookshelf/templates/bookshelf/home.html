@@ -1,0 +1,124 @@
+{% load static %}
+
+<html>
+<head>
+    <title>Bookshelf</title>
+    <link rel="shortcut icon" href="{% static 'images/book-stack.png' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,500;1,100&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <script>
+        let covers = [];
+    </script>
+    <div id='c'>
+        <div id='menu'>
+
+            <div class='add_book'>
+                <div class='add_book_window'>
+                    <form action="{% url 'add-book' %}" method="post" class='form'>
+                        {% csrf_token %} <!-- security -->
+                        <h1>Add Book</h1><br>
+                        <input type="text" class='input' name="book_title" placeholder="&#128216; title" required><br></br>
+                        <input type="text" class="input" name="book_author" placeholder="&#128100; author" required><br></br>
+                        <input type="submit" class='button' value="ADD" name="book_add_btn" id="book_add_btn">
+                    </form>
+                    <img class='add_book_photo' src="{% static 'images/book-stack.png' %}"/>                
+                </div>
+            </div>
+
+            <div class='book_list'>
+
+                <div class="book_list_window">
+                    {% for book in books %}
+                        <div class="one_book_pos {% if book.is_borrowed %}borrowed{% endif %}">
+                            <div class='pos_img'>
+                                <img id='pos_img_f' src="{% static 'images/book_covers/'%}k_{{book.cover}}.png"/> 
+                            </div>
+                            <div class='pos_info'>
+                                <h3>{{ book.title }}</h3>
+                                <p>{{ book.author }}</p>
+                            </div>
+                            <div class="pos_opt">
+                                {% if not book.is_borrowed %}
+                                    <div class="pos_b_btn">
+                                        <a href="{% url 'borrow-book' book.id %}">borrow</a>
+                                    </div>
+                                    <div class="pos_d_btn">
+                                        <a href="{% url 'delete-book' book.id %}">X</a>
+                                    </div>
+                                {% elif book.is_borrowed %}
+                                    <div class='borrowed_txt'><p>borrowed</p></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <script>
+                            covers.push('{{ book.cover }}');
+                        </script>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+        <div id='bookshelf'>
+            <img id='bookshelf_img' src="{% static 'images/bookshelf.png' %}" style="width: 0px;"/> 
+            <canvas width="800" height="1000"></canvas>
+            <script>
+                let canvas = document.querySelector('canvas');
+                let ctx = canvas.getContext("2d");
+                let bookshelf = document.getElementById("bookshelf_img");
+                
+                ctx.drawImage( bookshelf, 0, 0, 800, 1000 );
+            </script>
+            {% for book in books %}
+                <img class='book_cover' src="{% static 'images/book_covers/'%}k_{{book.cover}}.png" style="width: 0px;"/> 
+            {% endfor %}
+            <script>
+                let elements = document.getElementsByClassName("book_cover");
+
+                let pos_v = {
+                    1: '45',
+                    2: '100',
+                    3: '155',
+                    4: '210',
+                    5: '265',
+                    6: '320',
+                    7: '375',
+                    8: '430',
+                    9: '485',
+                    10: '540',
+                    11: '595',
+                    12: '650',
+                    13: '705'
+                }
+                let pos_h = {
+                    1: '30',
+                    2: '217',
+                    3: '404',
+                    4: '591',
+                    5: '772',
+                }
+
+                let v=1;
+                let h=1;
+
+                for (const element of elements){
+                     
+                    ctx.drawImage( element, pos_v[v], pos_h[h], 50, 150 );
+
+                    v+=1;
+                    if (v>13){
+                        v=1;
+                        h+=1;
+                    }
+                }
+            </script>
+        </div>     
+    </div>
+</body>
+</html>
